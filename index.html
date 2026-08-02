@@ -4,6 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#fdf5e9">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="生日礼物">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <title>给 tx 的生日礼物</title>
   <link rel="stylesheet" href="assets/fonts/fonts.css">
   <link rel="stylesheet" href="css/styles.css">
@@ -46,7 +54,11 @@
     </div>
   </div>
 
-  <audio id="bgm" src="assets/music/birthday-gentle-loop.wav" loop preload="auto"></audio>
+  <audio id="bgm" loop preload="auto">
+    <source src="assets/music/birthday-gentle-loop.mp3" type="audio/mpeg">
+    <source src="assets/music/birthday-gentle-loop.ogg" type="audio/ogg">
+    <source src="assets/music/birthday-gentle-loop.wav" type="audio/wav">
+  </audio>
 
   <script src="libs/gsap.min.js"></script>
   <script src="libs/ScrollTrigger.min.js"></script>

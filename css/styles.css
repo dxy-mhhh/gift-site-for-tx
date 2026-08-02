@@ -20,17 +20,25 @@ body {
   height: 100%;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   font-family: "Ma Shan Zheng", "Kaiti SC", "STKaiti", "KaiTi", cursive;
   color: var(--ink);
   background: var(--cream);
   overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
 button {
   font-family: inherit;
   color: inherit;
+  touch-action: manipulation;
 }
 
 #app {
@@ -130,7 +138,7 @@ button {
   flex-direction: column;
   gap: 4vh;
   text-align: center;
-  padding: 24px 20px;
+  padding: calc(24px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom));
 }
 
 .cover-copy {
@@ -343,7 +351,7 @@ button {
 }
 
 .scene-letter {
-  padding: 18px;
+  padding: calc(18px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom));
 }
 
 .letter-scene {
@@ -718,6 +726,15 @@ button {
   z-index: 20;
 }
 
+.spark {
+  position: fixed;
+  z-index: 40;
+  pointer-events: none;
+  font-size: 15px;
+  line-height: 1;
+  transform: translate(-50%, -50%);
+}
+
 .curtain {
   position: absolute;
   inset: 0;
@@ -741,6 +758,7 @@ button {
   flex-direction: column;
   gap: 18px;
   align-items: center;
+  padding: calc(24px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom));
 }
 
 .curtain-star {
@@ -788,6 +806,37 @@ button {
 
   .letter-paper {
     padding: 18px 16px;
+  }
+}
+
+@media (max-height: 620px) {
+  .envelope {
+    width: min(70vw, 300px);
+    height: min(44vw, 190px);
+  }
+
+  .letter-paper {
+    max-height: 78vh;
+  }
+
+  .hw-char,
+  .hw-char svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .hw-written,
+  .hw-fallback {
+    font-size: 30px;
+  }
+}
+
+@media (hover: none) {
+  .option-card:hover,
+  .btn:hover,
+  .star-btn:hover {
+    transform: none;
+    box-shadow: none;
   }
 }
 

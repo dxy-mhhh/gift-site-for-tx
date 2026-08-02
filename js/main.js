@@ -116,6 +116,36 @@
     burst(rect.left + rect.width / 2, rect.top + rect.height / 2, opts);
   }
 
+  function sparkleAt(element) {
+    const rect = element.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const colors = ["#fbbf24", "#f472b6", "#fde68a", "#f9a8d4", "#38bdf8"];
+    for (let i = 0; i < 7; i++) {
+      const angle = (i / 7) * Math.PI * 2;
+      const dist = 26 + Math.random() * 14;
+      const spark = document.createElement("span");
+      spark.className = "spark";
+      spark.style.left = cx + "px";
+      spark.style.top = cy + "px";
+      spark.style.color = colors[i % colors.length];
+      spark.textContent = "\u2726";
+      document.body.appendChild(spark);
+      gsap.to(spark, {
+        x: Math.cos(angle) * dist,
+        y: Math.sin(angle) * dist,
+        autoAlpha: 0,
+        scale: 0.35,
+        rotation: 90,
+        duration: 0.45 + Math.random() * 0.2,
+        ease: "power2.out",
+        onComplete: function () {
+          spark.remove();
+        }
+      });
+    }
+  }
+
   function startMusic() {
     if (app.musicStarted) return;
     app.musicStarted = true;
@@ -513,7 +543,6 @@
       grid.appendChild(btn);
     });
     $(".star-grid-wrap", box).appendChild(grid);
-    gsap.fromTo(".star-btn", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, stagger: 0.03, duration: 0.4, ease: "back.out(2)" });
   }
 
   function lightStar(btn, text, cfg, box) {
@@ -527,7 +556,7 @@
     p.textContent = "第 " + app.starsLit + " 颗星：" + text;
     card.appendChild(p);
     gsap.fromTo(card, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.45 });
-    burstAt(btn, { count: 24, spread: 50, scalar: 0.7 });
+    sparkleAt(btn);
 
     if (app.starsLit === cfg.compliments.length) {
       gsap.delayedCall(1.1, function () {
@@ -802,6 +831,15 @@
   $("#replay-btn").addEventListener("click", function () {
     window.location.reload();
   });
+
+  if ("serviceWorker" in navigator) {
+    const secure = location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1";
+    if (secure) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("sw.js").catch(function () {});
+      });
+    }
+  }
 
   window.addEventListener("DOMContentLoaded", function () {
     initCover();
