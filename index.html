@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fdf5e9">
+  <title>给 tx 的生日礼物</title>
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div id="app">
+    <div id="bg-decor" aria-hidden="true"></div>
+    <div id="bg-anim" aria-hidden="true"></div>
+
+    <section id="scene-cover" class="scene scene-cover active">
+      <div class="cover-copy">
+        <h1 id="cover-line"></h1>
+        <p class="cover-sub" id="cover-sub"></p>
+      </div>
+      <button id="cover-envelope" class="envelope-shell" type="button" aria-label="打开信封">
+        <span class="envelope">
+          <span class="env-back"></span>
+          <span class="env-letter">给 tx</span>
+          <span class="env-front"></span>
+          <span class="env-flap"></span>
+          <span class="env-stamp">🎀</span>
+          <span class="env-label" id="cover-label" aria-hidden="true"></span>
+        </span>
+        <span class="cover-hint">点一下信封</span>
+      </button>
+    </section>
+
+    <section id="scene-letter" class="scene scene-letter" aria-live="polite">
+      <div id="letter-stage"></div>
+    </section>
+
+    <div id="curtain" class="curtain" aria-hidden="true">
+      <div class="curtain-inner">
+        <div class="curtain-star">⭐</div>
+        <h2 id="curtain-title">生日快乐</h2>
+        <p id="curtain-sub"></p>
+        <p id="curtain-date"></p>
+        <button id="replay-btn" class="btn btn-light" type="button">再看一次</button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="bgm" src="assets/music/birthday-gentle-loop.wav" loop preload="auto"></audio>
+
+  <script src="libs/gsap.min.js"></script>
+  <script src="libs/ScrollTrigger.min.js"></script>
+  <script src="libs/SplitText.min.js"></script>
+  <script src="libs/hanzi-writer.min.js"></script>
+  <script src="libs/canvas-confetti.min.js"></script>
+  <script src="js/hanzi-data.js"></script>
+  <script src="js/content.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
