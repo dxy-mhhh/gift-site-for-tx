@@ -18,7 +18,17 @@
     night: "#facc15",
     floral: "#15803d",
     cake: "#db2777",
-    gold: "#b45309"
+    gold: "#b45309",
+    memories: "#6d28d9"
+  };
+
+  const SKIN_WAVE = {
+    rose: "#f472b6",
+    night: "#818cf8",
+    floral: "#22c55e",
+    cake: "#ec4899",
+    gold: "#f59e0b",
+    memories: "#a78bfa"
   };
 
   const SKIN_STAMP = {
@@ -26,7 +36,8 @@
     night: "⭐",
     floral: "🌷",
     cake: "🧁",
-    gold: "🎈"
+    gold: "🎈",
+    memories: "📷"
   };
 
   const MONEY_SVG = `
@@ -350,114 +361,47 @@
     );
   }
 
-  function showHandwrittenChar(target, ch, skin) {
-    target.innerHTML = "";
-    const rot = (Math.random() * 8 - 4).toFixed(1);
-    const span = document.createElement("span");
-    span.className = "hw-written";
-    span.style.color = SKIN_INK[skin] || "#9f1239";
-    span.style.setProperty("--rot", rot + "deg");
-    span.textContent = ch;
-    target.appendChild(span);
-  }
-
-  function animateFallbackChar(target, ch, skin) {
-    target.innerHTML = "";
-    const ink = SKIN_INK[skin] || "#9f1239";
-    const rot = (Math.random() * 8 - 4).toFixed(1);
-    const wrap = document.createElement("span");
-    wrap.className = "hw-fallback";
-    wrap.style.color = ink;
-    wrap.style.setProperty("--rot", rot + "deg");
-    const ghost = document.createElement("span");
-    ghost.className = "hw-fallback-ghost";
-    ghost.textContent = ch;
-    const inkSpan = document.createElement("span");
-    inkSpan.className = "hw-fallback-ink";
-    inkSpan.textContent = ch;
-    wrap.appendChild(ghost);
-    wrap.appendChild(inkSpan);
-    target.appendChild(wrap);
-    return new Promise(function (resolve) {
-      gsap.fromTo(
-        inkSpan,
-        { clipPath: "inset(0 100% 0 0)" },
-        {
-          clipPath: "inset(0 0% 0 0)",
-          duration: 0.32,
-          ease: "power2.inOut",
-          onComplete: resolve
-        }
-      );
-    });
-  }
-
   function writeTitle(title, container, skin) {
     container.innerHTML = "";
+    container.classList.add("env-label--decorated");
+    container.style.display = "flex";
+
+    const ink = SKIN_INK[skin] || "#9f1239";
+    const waveColor = SKIN_WAVE[skin] || "#f472b6";
+
+    const text = document.createElement("span");
+    text.className = "env-title-text";
+    text.style.setProperty("--title-ink", ink);
+    text.style.setProperty("--title-wave", waveColor);
+    container.appendChild(text);
+
     const chars = Array.from(title);
-    const spans = chars.map(function (ch) {
-      const span = document.createElement("span");
-      span.className = "hw-char";
-      container.appendChild(span);
-      return span;
+    chars.forEach(function (ch) {
+      const c = document.createElement("span");
+      c.className = "env-title-char";
+      c.textContent = ch;
+      text.appendChild(c);
     });
 
-    return new Promise(function (resolve) {
-      let idx = 0;
-      function next() {
-        if (idx >= chars.length) {
-          setTimeout(resolve, 350);
-          return;
-        }
-        const ch = chars[idx];
-        const target = spans[idx];
-        const hasData = window.HANZI_DATA && HANZI_DATA[ch];
-        if (window.HanziWriter && hasData) {
-          const writer = HanziWriter.create(target, ch, {
-            width: 64,
-            height: 64,
-            padding: 5,
-            showOutline: false,
-            showCharacter: false,
-            strokeColor: SKIN_INK[skin] || "#9f1239",
-            highlightColor: "#fde68a",
-            strokeFadeDuration: 0.02,
-            strokeAnimationSpeed: 6,
-            delayBetweenStrokes: 0,
-            charDataLoader: function (character, onComplete) {
-              if (onComplete) {
-                onComplete(HANZI_DATA[character]);
-              }
-              return HANZI_DATA[character];
-            }
-          });
-          let finished = false;
-          const finishChar = function () {
-            if (finished) return;
-            finished = true;
-            showHandwrittenChar(target, ch, skin);
-            idx++;
-            setTimeout(next, 60);
-          };
-          const anim = writer.animateCharacter({ onComplete: finishChar });
-          if (anim && typeof anim.then === "function") {
-            anim.then(finishChar);
-          }
-          setTimeout(function () {
-            if (!finished) {
-              showHandwrittenChar(target, ch, skin);
-              finishChar();
-            }
-          }, 1500);
-        } else {
-          animateFallbackChar(target, ch, skin).then(function () {
-            idx++;
-            setTimeout(next, 60);
-          });
+    const charEls = Array.from(text.querySelectorAll(".env-title-char"));
+
+    gsap.fromTo(
+      charEls,
+      { opacity: 0, y: 10, scale: 0.9 },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.45,
+        stagger: 0.34,
+        ease: "power2.out",
+        onComplete: function () {
+          gsap.set(charEls, { clearProps: "transform" });
         }
       }
-      next();
-    });
+    );
+
+    return Promise.resolve();
   }
 
   function openLetter(index) {
@@ -497,6 +441,7 @@
     const cfg = CONFIG.letters[index];
     if (cfg.kind === "opening") renderOpening(cfg, container);
     if (cfg.kind === "stars") renderStars(cfg, container);
+    if (cfg.kind === "memories") renderMemories(cfg, container);
     if (cfg.kind === "flower") renderFlower(cfg, container);
     if (cfg.kind === "wish") renderWish(cfg, container);
     if (cfg.kind === "ending") renderEnding(cfg, container);
@@ -509,16 +454,120 @@
       '<p class="body-text">' + cfg.body + "</p>" +
       '<p class="signature">' + cfg.signature + "</p>";
 
-    const tl = gsap.timeline();
-    tl.fromTo(".paper-title", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.6 })
-      .fromTo(".greeting", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5 }, "-=0.3")
-      .fromTo(".body-text", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.7 }, "-=0.2")
-      .fromTo(".signature", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.5 }, "-=0.3")
-      .add(function () {
-        gsap.delayedCall(1.5, function () {
-          showNext(box, "收好这封信");
-        });
+    reserveNextBtn(box);
+
+    gsap.delayedCall(1.5, function () {
+      showNext(box, "收好这封信");
+    });
+  }
+
+  function generateEllipsePath(cx, cy, rx, ry) {
+    return "M " + (cx - rx) + " " + cy + " A " + rx + " " + ry + " 0 1 0 " + (cx + rx) + " " + cy + " A " + rx + " " + ry + " 0 1 0 " + (cx - rx) + " " + cy;
+  }
+
+  function renderMemories(cfg, box) {
+    var data = cfg.orbit || {};
+    var images = data.images || [];
+    var baseW = 700;
+    var baseH = 700;
+    var cx = baseW / 2;
+    var cy = baseH / 2;
+    var rx = data.radiusX || 300;
+    var ry = data.radiusY || 110;
+    var rotation = data.rotation != null ? data.rotation : -8;
+    var duration = data.duration || 28;
+    var itemSize = data.itemSize || 70;
+    var path = generateEllipsePath(cx, cy, rx, ry);
+
+    var hasOffsetPath = CSS && CSS.supports && (CSS.supports("offset-path", 'path("M 0 0 L 1 1")') || CSS.supports("offset-path", "path(%)"));
+
+    box.innerHTML =
+      '<h2 class="memories-title">' + cfg.title + "</h2>" +
+      '<div class="orbit-stage" id="orbit-stage">' +
+      '<div class="orbit-design" style="--design-w:' + baseW + "px;--design-h:" + baseH + 'px;">' +
+      '<div class="orbit-wrapper" id="orbit-wrapper" style="--orbit-rot:' + rotation + 'deg;">' +
+      '<svg class="orbit-path-debug" viewBox="0 0 ' + baseW + " " + baseH + '" aria-hidden="true">' +
+      '<path d="' + path + '" fill="none" stroke="rgba(167,139,250,0.18)" stroke-width="2"/></svg>' +
+      "</div></div></div>" +
+      '<p class="body-text" style="text-align:center">' + (cfg.caption || "") + "</p>";
+
+    var stage = $("#orbit-stage", box);
+    var design = $(".orbit-design", box);
+    var wrapper = $("#orbit-wrapper", box);
+
+    var center = document.createElement("div");
+    center.className = "orbit-center";
+    center.innerHTML =
+      '<span class="orbit-center-eyebrow">' + (cfg.centerEyebrow || "") + "</span>" +
+      '<span class="orbit-center-title">' + (cfg.centerTitle || "") + "</span>" +
+      '<span class="orbit-center-sub">' + (cfg.centerSub || "") + "</span>";
+    design.appendChild(center);
+
+    if (!hasOffsetPath) {
+      stage.classList.add("no-offsetpath");
+      wrapper.style.display = "none";
+      images.forEach(function (src) {
+        var item = document.createElement("div");
+        item.className = "orbit-item";
+        item.innerHTML = '<div class="orbit-item-inner"><img src="' + src + '" alt="回忆" loading="lazy"></div>';
+        stage.appendChild(item);
       });
+      reserveNextBtn(box);
+      gsap.delayedCall(3.5, function () {
+        showMemoriesNext(box, cfg);
+      });
+      return;
+    }
+
+    var items = [];
+    images.forEach(function (src, index) {
+      var item = document.createElement("div");
+      item.className = "orbit-item";
+      item.style.setProperty("--item-size", itemSize + "px");
+      item.style.setProperty("offset-path", 'path("' + path + '")');
+      var inner = document.createElement("div");
+      inner.className = "orbit-item-inner";
+      inner.style.setProperty("--orbit-rot", rotation + "deg");
+      var img = document.createElement("img");
+      img.src = src;
+      img.alt = "回忆 " + (index + 1);
+      img.loading = "lazy";
+      img.draggable = false;
+      inner.appendChild(img);
+      item.appendChild(inner);
+      wrapper.appendChild(item);
+      items.push({ el: item, offset: index / images.length });
+    });
+
+    gsap.set(design, { autoAlpha: 0, scale: 0.9 });
+    gsap.to(design, { autoAlpha: 1, scale: 1, duration: 0.8, ease: "power3.out" });
+
+    var progress = 0;
+    var ticker = gsap.ticker.add(function (time, delta) {
+      if (!duration) return;
+      progress += (delta / 1000) / duration;
+      if (progress > 1) progress -= 1;
+      items.forEach(function (it) {
+        var d = (progress + it.offset) % 1;
+        it.el.style.offsetDistance = (d * 100).toFixed(3) + "%";
+      });
+    });
+
+    reserveNextBtn(box);
+
+    gsap.delayedCall(3.5, function () {
+      showMemoriesNext(box, cfg);
+    });
+
+    box._orbitTicker = ticker;
+  }
+
+  function showMemoriesNext(box, cfg) {
+    if (box._memoriesShown) return;
+    box._memoriesShown = true;
+    gsap.delayedCall(0.4, function () {
+      showNext(box, "收好这份回忆");
+    });
   }
 
   function renderStars(cfg, box) {
@@ -543,6 +592,8 @@
       grid.appendChild(btn);
     });
     $(".star-grid-wrap", box).appendChild(grid);
+
+    reserveNextBtn(box);
   }
 
   function lightStar(btn, text, cfg, box) {
@@ -591,7 +642,8 @@
         chooseFlower(btn.dataset.id, cfg, box);
       });
     });
-    gsap.fromTo(".option-card", { opacity: 0, y: 12 }, { opacity: 1, y: 0, stagger: 0.08, duration: 0.45, ease: "power2.out" });
+
+    reserveNextBtn(box);
   }
 
   function chooseFlower(id, cfg, box) {
@@ -631,22 +683,17 @@
       '<p class="wish-prompt">' + cfg.prompt + "</p>" +
       '<p class="wish-after">' + cfg.after + "</p>";
 
+    reserveNextBtn(box);
+
     startFlameFlicker();
 
-    const tl = gsap.timeline();
-    tl.fromTo(".wish-line1", { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: 0.5 })
-      .fromTo(".wish-line2", { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.55, ease: "back.out(2)" }, "-=0.2")
-      .fromTo(".cake", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, "-=0.1")
-      .fromTo(".wish-prompt", { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.5 }, "-=0.2")
-      .add(function () {
-        gsap.delayedCall(2.8, blowOutCandles);
-        gsap.delayedCall(4.8, function () {
-          gsap.to(".wish-after", { opacity: 1, y: 0, duration: 0.6 });
-          gsap.delayedCall(1.2, function () {
-            showNext(box, "愿望收好");
-          });
-        });
+    gsap.delayedCall(2.8, blowOutCandles);
+    gsap.delayedCall(4.8, function () {
+      gsap.to(".wish-after", { opacity: 1, y: 0, duration: 0.6 });
+      gsap.delayedCall(1.2, function () {
+        showNext(box, "愿望收好");
       });
+    });
   }
 
   function startFlameFlicker() {
@@ -724,11 +771,9 @@
       '<p class="body-text">' + cfg.body + "</p>" +
       '<p class="signature">' + cfg.signature + "</p>" +
       '<p class="ending-date">' + cfg.date + "</p>";
-    gsap.fromTo(
-      box.children,
-      { opacity: 0, y: 12 },
-      { opacity: 1, y: 0, stagger: 0.35, duration: 0.6, ease: "power2.out" }
-    );
+
+    reserveNextBtn(box);
+
     fireworks(4);
     gsap.delayedCall(5.2, function () {
       showNext(box, "收好这封信");
@@ -747,21 +792,27 @@
     }
   }
 
+  function reserveNextBtn(box) {
+    if ($(".next-btn", box)) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn btn-primary next-btn";
+    btn.textContent = "下一封信";
+    btn.style.opacity = "0";
+    btn.style.transform = "translateY(8px)";
+    btn.style.pointerEvents = "none";
+    btn.addEventListener("click", function () {
+      closeLetter(app.index);
+    });
+    box.appendChild(btn);
+  }
+
   function showNext(box, label) {
-    let btn = $(".next-btn", box);
-    if (!btn) {
-      btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "btn btn-primary next-btn";
-      btn.textContent = label || "下一封信";
-      box.appendChild(btn);
-      btn.addEventListener("click", function () {
-        closeLetter(app.index);
-      });
-    } else {
-      btn.textContent = label || btn.textContent;
+    var btn = $(".next-btn", box);
+    if (btn) {
+      if (label) btn.textContent = label;
+      gsap.to(btn, { opacity: 1, y: 0, pointerEvents: "auto", duration: 0.5, ease: "power2.out" });
     }
-    gsap.to(btn, { autoAlpha: 1, y: 0, pointerEvents: "auto", duration: 0.5, ease: "power2.out" });
   }
 
   function closeLetter(index) {
@@ -769,6 +820,7 @@
     app.busy = true;
     const scene = $("#letter-stage .letter-scene");
     const paper = $(".letter-paper", scene);
+    const box = $(".paper-inner", scene) || paper;
     paper.classList.remove("open");
     const env = $(".envelope", scene);
     env.classList.remove("opened");
@@ -776,6 +828,10 @@
     if (app.flameTweens) {
       app.flameTweens.forEach(function (tl) { tl.kill(); });
       app.flameTweens = [];
+    }
+    if (box && box._orbitTicker) {
+      gsap.ticker.remove(box._orbitTicker);
+      box._orbitTicker = null;
     }
 
     const tl = gsap.timeline({
@@ -812,6 +868,55 @@
     $("#curtain-sub").textContent = "To " + CONFIG.recipient + " · From " + CONFIG.sender;
     $("#curtain-date").textContent = CONFIG.date;
     gsap.to("#curtain", { autoAlpha: 1, duration: 1.2, ease: "power2.out" });
+
+    if (window.Galaxy) {
+      app.galaxy = new window.Galaxy({
+        container: "#curtain-galaxy",
+        focal: [0.5, 0.5],
+        rotation: [1.0, 0.0],
+        starSpeed: 0.5,
+        density: 1.5,
+        hueShift: 200,
+        speed: 1.0,
+        mouseInteraction: true,
+        glowIntensity: 0.4,
+        saturation: 0.7,
+        mouseRepulsion: true,
+        repulsionStrength: 2,
+        twinkleIntensity: 0.4,
+        rotationSpeed: 0.08,
+        transparent: true,
+      });
+      try {
+        app.galaxy.init();
+      } catch (e) {
+        app.galaxy = null;
+      }
+    }
+
+    if (window.LightRays) {
+      app.lightRays = new window.LightRays({
+        container: "#curtain-rays",
+        raysOrigin: "top-center",
+        raysColor: "#fde68a",
+        raysSpeed: 1.2,
+        lightSpread: 0.6,
+        rayLength: 1.6,
+        pulsating: true,
+        fadeDistance: 1.2,
+        saturation: 0.85,
+        followMouse: true,
+        mouseInfluence: 0.08,
+        noiseAmount: 0.08,
+        distortion: 0.03,
+      });
+      try {
+        app.lightRays.init();
+      } catch (e) {
+        app.lightRays = null;
+      }
+    }
+
     fireworks(5);
     gsap.to("#bgm", {
       volume: 0,
@@ -826,10 +931,6 @@
     const interactive = event.target.closest("button, a, .envelope, .envelope-shell");
     if (interactive) return;
     burst(event.clientX, event.clientY, { count: 36, spread: 70 });
-  });
-
-  $("#replay-btn").addEventListener("click", function () {
-    window.location.reload();
   });
 
   if ("serviceWorker" in navigator) {

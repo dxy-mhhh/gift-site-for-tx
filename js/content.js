@@ -83,6 +83,33 @@ window.GIFT_CONFIG = {
       ]
     },
     {
+      id: "memories",
+      skin: "memories",
+      title: "一些回忆",
+      kind: "memories",
+      orbit: {
+        shape: "ellipse",
+        radiusX: 300,
+        radiusY: 110,
+        rotation: -8,
+        duration: 28,
+        itemSize: 70,
+        images: [
+          "assets/photos/photo-1.jpg",
+          "assets/photos/photo-2.jpg",
+          "assets/photos/photo-3.jpg",
+          "assets/photos/photo-4.jpg",
+          "assets/photos/photo-5.jpg",
+          "assets/photos/photo-6.jpg"
+        ]
+      },
+      centerEyebrow: "一点一滴",
+      centerTitle: "我们的回忆",
+      centerSub: "都是宝藏",
+      caption: "有些画面，当时不觉得珍贵，回头再看，才发现那就是最闪闪发光的日子。",
+      final: "愿所有回忆，都化作未来的勇气"
+    },
+    {
       id: "wish",
       skin: "cake",
       title: "愿望呢",
