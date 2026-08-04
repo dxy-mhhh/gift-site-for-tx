@@ -967,16 +967,13 @@
 
     var total = images.length + audio.length;
     var loaded = 0;
-    var bar = document.getElementById("preloader-bar");
     var text = document.getElementById("preloader-text");
 
     function update() {
       loaded++;
-      var pct = Math.round((loaded / total) * 100);
-      if (bar) bar.style.width = pct + "%";
-      if (text && pct >= 100) text.textContent = "准备就绪";
+      if (text && loaded >= total) text.textContent = "Ready for TX";
       if (loaded >= total) {
-        setTimeout(hidePreloader, 300);
+        setTimeout(hidePreloader, 600);
       }
     }
 

@@ -54,7 +54,7 @@ button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 18px;
+  gap: 24px;
   background: linear-gradient(160deg, #2a1b3d, #1c1228);
   color: #fff;
   transition: opacity 0.8s ease, visibility 0.8s ease;
@@ -72,20 +72,53 @@ button {
   opacity: 0.85;
 }
 
-.preloader-bar {
-  width: min(240px, 60vw);
-  height: 4px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.15);
-  overflow: hidden;
+/* ---- Loader SVG (uiverse.io / SelfMadeSystem) ---- */
+.absolute { position: absolute; }
+.inline-block { display: inline-block; }
+
+.loader {
+  display: flex;
+  margin: 0.25em 0;
+  align-items: center;
 }
 
-.preloader-bar-fill {
-  height: 100%;
-  width: 0%;
-  border-radius: 4px;
-  background: linear-gradient(90deg, #fbbf24, #f472b6);
-  transition: width 0.3s ease;
+.w-2 { width: 0.5em; }
+
+.dash {
+  animation: dashArray 2s ease-in-out infinite,
+    dashOffset 2s linear infinite;
+}
+
+.spin {
+  animation: spinDashArray 2s ease-in-out infinite,
+    spin 8s ease-in-out infinite,
+    dashOffset 2s linear infinite;
+  transform-origin: center;
+}
+
+@keyframes dashArray {
+  0% { stroke-dasharray: 0 1 359 0; }
+  50% { stroke-dasharray: 0 359 1 0; }
+  100% { stroke-dasharray: 359 1 0 0; }
+}
+
+@keyframes spinDashArray {
+  0% { stroke-dasharray: 270 90; }
+  50% { stroke-dasharray: 0 360; }
+  100% { stroke-dasharray: 270 90; }
+}
+
+@keyframes dashOffset {
+  0% { stroke-dashoffset: 365; }
+  100% { stroke-dashoffset: 5; }
+}
+
+@keyframes spin {
+  0% { rotate: 0deg; }
+  12.5%, 25% { rotate: 270deg; }
+  37.5%, 50% { rotate: 540deg; }
+  62.5%, 75% { rotate: 810deg; }
+  87.5%, 100% { rotate: 1080deg; }
 }
 
 #app::after {
