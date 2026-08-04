@@ -945,5 +945,63 @@
   window.addEventListener("DOMContentLoaded", function () {
     initCover();
     initBackground();
+    preloadAssets();
   });
+
+  function preloadAssets() {
+    var images = [
+      "assets/photos/photo-1.jpg",
+      "assets/photos/photo-2.jpg",
+      "assets/photos/photo-3.jpg",
+      "assets/photos/photo-4.jpg",
+      "assets/photos/photo-5.jpg",
+      "assets/photos/photo-6.jpg",
+      "assets/flowers/rose.jpg",
+      "assets/flowers/sunflower.jpg",
+      "assets/flowers/tulip.jpg",
+      "handdrawn-bg-preview.png",
+    ];
+    var audio = [
+      "assets/music/birthday-gentle-loop.mp3",
+    ];
+
+    var total = images.length + audio.length;
+    var loaded = 0;
+    var bar = document.getElementById("preloader-bar");
+    var text = document.getElementById("preloader-text");
+
+    function update() {
+      loaded++;
+      var pct = Math.round((loaded / total) * 100);
+      if (bar) bar.style.width = pct + "%";
+      if (text && pct >= 100) text.textContent = "准备就绪";
+      if (loaded >= total) {
+        setTimeout(hidePreloader, 300);
+      }
+    }
+
+    images.forEach(function (src) {
+      var img = new Image();
+      img.onload = img.onerror = update;
+      img.src = src;
+    });
+
+    audio.forEach(function (src) {
+      var a = new Audio();
+      a.preload = "auto";
+      a.addEventListener("canplaythrough", update, { once: true });
+      a.addEventListener("error", update, { once: true });
+      a.src = src;
+    });
+  }
+
+  function hidePreloader() {
+    var preloader = document.getElementById("preloader");
+    if (preloader) {
+      preloader.classList.add("hidden");
+      setTimeout(function () {
+        if (preloader.parentNode) preloader.parentNode.removeChild(preloader);
+      }, 800);
+    }
+  }
 })();
