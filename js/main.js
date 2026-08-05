@@ -543,7 +543,13 @@
       inner.appendChild(img);
       item.appendChild(inner);
       wrapper.appendChild(item);
-      items.push({ el: item, offset: index / images.length });
+      var itemData = { el: item, offset: index / images.length, src: src };
+      items.push(itemData);
+
+      item.addEventListener("click", function (e) {
+        e.stopPropagation();
+        enlargePhoto(itemData);
+      });
     });
 
     gsap.set(design, { autoAlpha: 0, scale: 0.9 });
@@ -551,7 +557,7 @@
 
     var progress = 0;
     var ticker = gsap.ticker.add(function (time, delta) {
-      if (!duration) return;
+      if (!duration || app.orbitPaused) return;
       progress += (delta / 1000) / duration;
       if (progress > 1) progress -= 1;
       items.forEach(function (it) {
@@ -560,13 +566,95 @@
       });
     });
 
+    box._orbitItems = items;
+    box._orbitTicker = ticker;
+    box._orbitDuration = duration;
+    box._orbitProgress = progress;
+
     reserveNextBtn(box);
 
     gsap.delayedCall(3.5, function () {
       showMemoriesNext(box, cfg);
     });
+  }
 
-    box._orbitTicker = ticker;
+  function enlargePhoto(itemData) {
+    if (app.orbitPaused) return;
+    app.orbitPaused = true;
+
+    var src = itemData.src;
+    var stage = $(".orbit-stage");
+    if (!stage) return;
+    var rect = stage.getBoundingClientRect();
+    var centerX = rect.left + rect.width / 2;
+    var centerY = rect.top + rect.height / 2;
+    var enlargeSize = Math.min(rect.width * 0.7, 320);
+
+    var backdrop = document.createElement("div");
+    backdrop.className = "orbit-backdrop";
+    document.body.appendChild(backdrop);
+
+    var enlarged = document.createElement("div");
+    enlarged.className = "orbit-enlarged";
+    enlarged.style.setProperty("--enlarge-size", enlargeSize + "px");
+    var img = document.createElement("img");
+    img.src = src;
+    img.alt = "";
+    enlarged.appendChild(img);
+    document.body.appendChild(enlarged);
+
+    var startRect = itemData.el.getBoundingClientRect();
+    enlarged.style.left = startRect.left + "px";
+    enlarged.style.top = startRect.top + "px";
+    enlarged.style.width = startRect.width + "px";
+    enlarged.style.height = startRect.height + "px";
+
+    var inner = itemData.el.querySelector(".orbit-item-inner");
+    if (inner) inner.style.opacity = "0.3";
+
+    gsap.set(enlarged, { opacity: 1 });
+    gsap.set(backdrop, { opacity: 0 });
+    gsap.to(backdrop, { opacity: 1, duration: 0.3 });
+
+    gsap.to(enlarged, {
+      left: centerX - enlargeSize / 2,
+      top: centerY - enlargeSize / 2,
+      width: enlargeSize,
+      height: enlargeSize,
+      duration: 0.45,
+      ease: "power3.out",
+      onComplete: function () {
+        itemData._enlargedDone = true;
+      }
+    });
+
+    function close() {
+      if (!app.orbitPaused) return;
+      app.orbitPaused = false;
+
+      var currentRect = itemData.el.getBoundingClientRect();
+      gsap.to(enlarged, {
+        left: currentRect.left,
+        top: currentRect.top,
+        width: currentRect.width,
+        height: currentRect.height,
+        duration: 0.35,
+        ease: "power3.in"
+      });
+      gsap.to(backdrop, {
+        opacity: 0,
+        duration: 0.35,
+        onComplete: function () {
+          backdrop.remove();
+          enlarged.remove();
+          if (inner) inner.style.opacity = "";
+        }
+      });
+    }
+
+    backdrop.addEventListener("click", close);
+    enlarged.addEventListener("click", close);
+    app._closeEnlarged = close;
   }
 
   function showMemoriesNext(box, cfg) {
@@ -841,6 +929,10 @@
     if (box && box._orbitTicker) {
       gsap.ticker.remove(box._orbitTicker);
       box._orbitTicker = null;
+    }
+    if (app._closeEnlarged) {
+      app._closeEnlarged();
+      app._closeEnlarged = null;
     }
 
     const tl = gsap.timeline({

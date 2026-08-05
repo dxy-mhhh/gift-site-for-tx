@@ -1019,6 +1019,8 @@ button {
   offset-anchor: center center;
   will-change: offset-distance, transform;
   user-select: none;
+  cursor: pointer;
+  z-index: 1;
 }
 
 .orbit-item-inner {
@@ -1031,6 +1033,7 @@ button {
   background: #fff;
   transform: rotate(calc(var(--orbit-rot, -8deg) * -1));
   transform-origin: center center;
+  transition: opacity 0.3s ease;
 }
 
 .orbit-item-inner img {
@@ -1039,6 +1042,47 @@ button {
   object-fit: cover;
   display: block;
   pointer-events: none;
+}
+
+.orbit-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(20, 10, 40, 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.orbit-backdrop.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.orbit-enlarged {
+  position: fixed;
+  z-index: 101;
+  width: var(--enlarge-size, 70px);
+  height: var(--enlarge-size, 70px);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 3px solid #fff;
+  background: #fff;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.orbit-enlarged img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .orbit-center {
