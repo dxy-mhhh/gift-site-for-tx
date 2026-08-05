@@ -1044,26 +1044,6 @@ button {
   pointer-events: none;
 }
 
-.orbit-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: rgba(20, 10, 40, 0.85);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.35s ease;
-}
-
-.orbit-backdrop.show {
-  opacity: 1;
-  pointer-events: auto;
-}
-
 .orbit-enlarged {
   position: fixed;
   z-index: 101;

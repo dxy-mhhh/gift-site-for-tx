@@ -590,10 +590,6 @@
     var centerY = rect.top + rect.height / 2;
     var enlargeSize = Math.min(rect.width * 0.7, 320);
 
-    var backdrop = document.createElement("div");
-    backdrop.className = "orbit-backdrop";
-    document.body.appendChild(backdrop);
-
     var enlarged = document.createElement("div");
     enlarged.className = "orbit-enlarged";
     enlarged.style.setProperty("--enlarge-size", enlargeSize + "px");
@@ -613,8 +609,6 @@
     if (inner) inner.style.opacity = "0.3";
 
     gsap.set(enlarged, { opacity: 1 });
-    gsap.set(backdrop, { opacity: 0 });
-    gsap.to(backdrop, { opacity: 1, duration: 0.3 });
 
     gsap.to(enlarged, {
       left: centerX - enlargeSize / 2,
@@ -622,15 +616,14 @@
       width: enlargeSize,
       height: enlargeSize,
       duration: 0.45,
-      ease: "power3.out",
-      onComplete: function () {
-        itemData._enlargedDone = true;
-      }
+      ease: "power3.out"
     });
 
     function close() {
       if (!app.orbitPaused) return;
       app.orbitPaused = false;
+
+      if (inner) inner.style.opacity = "";
 
       var currentRect = itemData.el.getBoundingClientRect();
       gsap.to(enlarged, {
@@ -639,21 +632,23 @@
         width: currentRect.width,
         height: currentRect.height,
         duration: 0.35,
-        ease: "power3.in"
-      });
-      gsap.to(backdrop, {
-        opacity: 0,
-        duration: 0.35,
+        ease: "power3.in",
         onComplete: function () {
-          backdrop.remove();
           enlarged.remove();
-          if (inner) inner.style.opacity = "";
         }
       });
+
+      document.removeEventListener("click", onDocClick);
     }
 
-    backdrop.addEventListener("click", close);
-    enlarged.addEventListener("click", close);
+    function onDocClick() {
+      close();
+    }
+
+    setTimeout(function () {
+      document.addEventListener("click", onDocClick);
+    }, 100);
+
     app._closeEnlarged = close;
   }
 
