@@ -106,19 +106,26 @@
       </g>
     </svg>`;
 
+  const isMobile = window.matchMedia("(max-width: 640px), (pointer: coarse)").matches;
+  const MOBILE_SCALE = isMobile ? 0.45 : 1;
+
   function burst(x, y, opts) {
     const o = opts || {};
     const colors = o.colors || ["#f43f5e", "#fbbf24", "#f472b6", "#38bdf8", "#a3e635"];
+    const rawCount = o.count || 70;
+    const count = Math.max(8, Math.round(rawCount * MOBILE_SCALE));
+    const shapes = isMobile ? ["circle"] : o.shapes || ["circle", "square"];
     confetti({
-      particleCount: o.count || 70,
+      particleCount: count,
       spread: o.spread || 75,
-      startVelocity: 32,
-      ticks: 180,
+      startVelocity: isMobile ? 24 : 32,
+      ticks: isMobile ? 120 : 180,
       gravity: 0.85,
       origin: { x: x / window.innerWidth, y: y / window.innerHeight },
       colors: colors,
       scalar: 0.9,
-      shapes: o.shapes || ["circle", "square"]
+      shapes: shapes,
+      flat: isMobile
     });
   }
 
@@ -781,12 +788,14 @@
   }
 
   function fireworks(rounds) {
-    for (let i = 0; i < rounds; i++) {
-      gsap.delayedCall(i * 0.9, function () {
+    const r = isMobile ? Math.min(rounds, 2) : rounds;
+    const interval = isMobile ? 1.2 : 0.9;
+    for (let i = 0; i < r; i++) {
+      gsap.delayedCall(i * interval, function () {
         burst(
           Math.random() * window.innerWidth,
           Math.random() * window.innerHeight * 0.7,
-          { count: 90, spread: 120, shapes: ["star", "circle"] }
+          { count: 90, spread: 120, shapes: isMobile ? ["circle"] : ["star", "circle"] }
         );
       });
     }
