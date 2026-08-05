@@ -1,4 +1,4 @@
-const CACHE_NAME = "gift-site-v2";
+const CACHE_NAME = "gift-site-v3";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -6,6 +6,8 @@ const CORE_ASSETS = [
   "./js/content.js",
   "./js/main.js",
   "./js/hanzi-data.js",
+  "./js/galaxy.js",
+  "./js/light-rays.js",
   "./libs/gsap.min.js",
   "./libs/ScrollTrigger.min.js",
   "./libs/SplitText.min.js",
@@ -16,6 +18,12 @@ const CORE_ASSETS = [
   "./assets/flowers/rose.jpg",
   "./assets/flowers/sunflower.jpg",
   "./assets/flowers/tulip.jpg",
+  "./assets/photos/photo-1.jpg",
+  "./assets/photos/photo-2.jpg",
+  "./assets/photos/photo-3.jpg",
+  "./assets/photos/photo-4.jpg",
+  "./assets/photos/photo-5.jpg",
+  "./assets/photos/photo-6.jpg",
   "./assets/fonts/fonts.css",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
@@ -61,6 +69,24 @@ self.addEventListener("fetch", function (event) {
         caches.open(CACHE_NAME).then(function (cache) {
           cache.put(request, copy);
         });
+        return response;
+      }).catch(function () {
+        return caches.match(request);
+      })
+    );
+    return;
+  }
+
+  const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url.pathname);
+  if (isImage) {
+    event.respondWith(
+      fetch(request).then(function (response) {
+        if (response && response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(function (cache) {
+            cache.put(request, copy);
+          });
+        }
         return response;
       }).catch(function () {
         return caches.match(request);
