@@ -1,4 +1,4 @@
-const CACHE_NAME = "gift-site-v4";
+const CACHE_NAME = "gift-site-v5";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -18,6 +18,7 @@ const CORE_ASSETS = [
   "./assets/flowers/rose.jpg",
   "./assets/flowers/sunflower.jpg",
   "./assets/flowers/tulip.jpg",
+  "./assets/flowers/money.jpg",
   "./assets/photos/photo-1.jpg",
   "./assets/photos/photo-2.jpg",
   "./assets/photos/photo-3.jpg",
@@ -97,16 +98,22 @@ self.addEventListener("fetch", function (event) {
 
   event.respondWith(
     caches.match(request).then(function (cached) {
-      if (cached) return cached;
-      return fetch(request).then(function (response) {
-        if (response && response.ok) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(function (cache) {
-            cache.put(request, copy);
-          });
-        }
-        return response;
-      }).catch(function () {
+      const fetchUpdate = function () {
+        return fetch(request).then(function (response) {
+          if (response && response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then(function (cache) {
+              cache.put(request, copy);
+            });
+          }
+          return response;
+        });
+      };
+      if (cached) {
+        fetchUpdate();
+        return cached;
+      }
+      return fetchUpdate().catch(function () {
         return cached;
       });
     })

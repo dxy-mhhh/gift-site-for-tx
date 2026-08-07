@@ -139,13 +139,27 @@
     }
   }
 
+  const MUSIC_VOLUME = 0.28;
+
+  function fadeMusic(to, duration, onDone) {
+    const bgm = $("#bgm");
+    gsap.killTweensOf(bgm, "volume");
+    if (to > 0 && bgm.volume < 0.0005) bgm.volume = 0.0001;
+    gsap.to(bgm, {
+      volume: to,
+      duration: duration,
+      ease: "power2.out",
+      onComplete: onDone
+    });
+  }
+
   function startMusic() {
     if (app.musicStarted) return;
     app.musicStarted = true;
     const bgm = $("#bgm");
     bgm.volume = 0;
     bgm.play().catch(function () {});
-    gsap.to(bgm, { volume: 0.28, duration: 1.8, ease: "power1.inOut" });
+    fadeMusic(MUSIC_VOLUME, 2);
   }
 
   function initMusicToggle() {
@@ -162,7 +176,7 @@
         return;
       }
       app.musicMuted = !app.musicMuted;
-      gsap.to($("#bgm"), { volume: app.musicMuted ? 0 : 0.28, duration: 0.6, ease: "power1.inOut" });
+      fadeMusic(app.musicMuted ? 0 : MUSIC_VOLUME, 0.8);
       setState(!app.musicMuted);
     });
   }
@@ -1432,12 +1446,8 @@
     }
 
     fireworks(5);
-    gsap.to("#bgm", {
-      volume: 0,
-      duration: 2.5,
-      onComplete: function () {
-        $("#bgm").pause();
-      }
+    fadeMusic(0, 2.5, function () {
+      $("#bgm").pause();
     });
   }
 

@@ -916,6 +916,14 @@ body.rain-mode #preloader {
   .letter-paper {
     padding: 18px 16px;
   }
+
+  .progress {
+    display: none;
+  }
+
+  #music-toggle {
+    display: none;
+  }
 }
 
 @media (max-height: 620px) {
