@@ -1,9 +1,17 @@
 window.GIFT_CONFIG = {
   sender: "dxy",
   recipient: "tx",
-  coverLine: "今天好像是你的生日，这个小礼物给你",
+  coverLine: "今天好像是你的生日，有个小礼物给你",
   coverSub: "dxy 准备的一点小心思",
-  date: "2026.08.08",
+  date: "2026.08.08", // TODO 测试后恢复 2026.08.08
+  countdown: {
+    note: "dxy 的一点点小心思，8.8 那天见。",
+    afterNote: "想我了？回忆一下吧"
+  },
+  easterEgg: {
+    clicks: 5,
+    message: "哈哈被你发现啦！偷偷告诉你，我改了好几遍，有些话改了又删，删了又改，就怕太肉麻。总而言之，生日快乐，tx。"
+  },
   letters: [
     {
       id: "opening",
@@ -40,7 +48,7 @@ window.GIFT_CONFIG = {
         "说话交流非常有意思",
         "全世界都该夸你，不止生日这天",
         "声音好听，唱歌好听",
-        "あなたのせいで、わたし少しも頭が冷めないよ",
+        "王者的好伙伴，温柔辅助，天才中单",
         "偶尔的小脾气也很可爱",
         "21 了，永远的18哈哈"
       ]
@@ -48,7 +56,7 @@ window.GIFT_CONFIG = {
     {
       id: "flower",
       skin: "floral",
-      title: "来朵花",
+      title: "一朵花",
       kind: "flower",
       question: "哈哈来朵花吧，你想要什么？",
       options: [
@@ -77,8 +85,8 @@ window.GIFT_CONFIG = {
           id: "money",
           name: "有钱花",
           icon: "💰",
-          image: null,
-          message: "大钱没有，有小钱花，找 dxy 兑现吧"
+          image: "assets/flowers/money.jpg",
+          message: "大钱花没有，有小钱花，找 dxy 兑现吧"
         }
       ]
     },
@@ -106,7 +114,7 @@ window.GIFT_CONFIG = {
       centerEyebrow: "一点一滴",
       centerTitle: "我们的回忆",
       centerSub: "都是宝藏",
-      caption: "这回忆的漩涡快要将我吞没 求你别离开我~",
+      caption: "这回忆的漩涡 快要将我吞没 求你别离开我~",
       final: "愿所有回忆，都化作未来的勇气"
     },
     {

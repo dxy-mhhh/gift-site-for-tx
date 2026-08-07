@@ -52,10 +52,41 @@
     <div class="preloader-text" id="preloader-text">Waiting for TX…</div>
   </div>
   <div id="app">
+    <button id="music-toggle" class="icon-btn" type="button" aria-label="关闭音乐">
+      <span class="icon-on" id="music-icon-on">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 6a9 9 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </span>
+      <span class="icon-off" id="music-icon-off">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 9l6 6M22 9l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </span>
+    </button>
+
+    <nav id="progress" class="progress" aria-label="信件进度">
+      <div id="progress-dots" class="progress-dots"></div>
+    </nav>
     <div id="bg-decor" aria-hidden="true"></div>
     <div id="bg-anim" aria-hidden="true"></div>
+    <div id="rain-bg" aria-hidden="true"></div>
+    <div id="rain-layer" aria-hidden="true"></div>
 
-    <section id="scene-cover" class="scene scene-cover active">
+    <section id="scene-countdown" class="scene scene-countdown" aria-hidden="true">
+      <div class="countdown-inner">
+        <span class="countdown-gift" aria-hidden="true">🎁</span>
+        <h2 class="countdown-title" id="countdown-title">距离 8.8 还有</h2>
+        <div class="countdown-clock" role="timer" aria-label="倒计时">
+          <div class="countdown-cell"><span id="cd-days">00</span><em>天</em></div>
+          <span class="countdown-sep">:</span>
+          <div class="countdown-cell"><span id="cd-hours">00</span><em>时</em></div>
+          <span class="countdown-sep">:</span>
+          <div class="countdown-cell"><span id="cd-minutes">00</span><em>分</em></div>
+          <span class="countdown-sep">:</span>
+          <div class="countdown-cell"><span id="cd-seconds">00</span><em>秒</em></div>
+        </div>
+        <p class="countdown-note" id="countdown-note"></p>
+      </div>
+    </section>
+
+    <section id="scene-cover" class="scene scene-cover">
       <div class="cover-copy">
         <h1 id="cover-line"></h1>
         <p class="cover-sub" id="cover-sub"></p>

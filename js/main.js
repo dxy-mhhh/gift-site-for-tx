@@ -40,31 +40,6 @@
     memories: "📷"
   };
 
-  const MONEY_SVG = `
-    <svg class="money-svg" viewBox="0 0 280 230" aria-hidden="true">
-      <path d="M140 215 C 118 178 118 132 140 92" fill="none" stroke="#15803d" stroke-width="6" stroke-linecap="round"/>
-      <path d="M140 215 C 162 178 162 132 140 92" fill="none" stroke="#166534" stroke-width="5" stroke-linecap="round"/>
-      <g transform="rotate(-32 140 92)">
-        <rect x="108" y="24" width="64" height="92" rx="12" fill="#dcfce7" stroke="#16a34a" stroke-width="4"/>
-        <text x="140" y="78" text-anchor="middle" font-size="30" fill="#15803d">¥</text>
-      </g>
-      <g transform="rotate(0 140 92)">
-        <rect x="108" y="24" width="64" height="92" rx="12" fill="#bbf7d0" stroke="#16a34a" stroke-width="4"/>
-        <text x="140" y="78" text-anchor="middle" font-size="30" fill="#15803d">¥</text>
-      </g>
-      <g transform="rotate(32 140 92)">
-        <rect x="108" y="24" width="64" height="92" rx="12" fill="#dcfce7" stroke="#16a34a" stroke-width="4"/>
-        <text x="140" y="78" text-anchor="middle" font-size="30" fill="#15803d">¥</text>
-      </g>
-      <g transform="rotate(64 140 92)">
-        <rect x="108" y="24" width="64" height="92" rx="12" fill="#bbf7d0" stroke="#16a34a" stroke-width="4"/>
-        <text x="140" y="78" text-anchor="middle" font-size="30" fill="#15803d">¥</text>
-      </g>
-      <circle cx="118" cy="196" r="10" fill="#fbbf24" stroke="#b45309" stroke-width="3"/>
-      <circle cx="162" cy="200" r="12" fill="#fde68a" stroke="#b45309" stroke-width="3"/>
-      <circle cx="140" cy="214" r="8" fill="#fcd34d" stroke="#b45309" stroke-width="3"/>
-    </svg>`;
-
   const CAKE_SVG = `
     <svg class="cake" viewBox="0 0 360 320" aria-hidden="true">
       <defs>
@@ -173,60 +148,436 @@
     gsap.to(bgm, { volume: 0.28, duration: 1.8, ease: "power1.inOut" });
   }
 
-  function initCover() {
-    $("#cover-line").textContent = CONFIG.coverLine;
-    $("#cover-sub").textContent = CONFIG.coverSub;
+  function initMusicToggle() {
+    const btn = $("#music-toggle");
+    const setState = function (playing) {
+      btn.classList.toggle("muted", !playing);
+      btn.setAttribute("aria-label", playing ? "关闭音乐" : "打开音乐");
+    };
+    setState(true);
+    btn.addEventListener("click", function () {
+      if (!app.musicStarted) {
+        startMusic();
+        setState(true);
+        return;
+      }
+      app.musicMuted = !app.musicMuted;
+      gsap.to($("#bgm"), { volume: app.musicMuted ? 0 : 0.28, duration: 0.6, ease: "power1.inOut" });
+      setState(!app.musicMuted);
+    });
+  }
 
-    let coverStarted = false;
-    const startCover = function () {
-      if (coverStarted) return;
-      coverStarted = true;
-      if (window.SplitText) {
-        const split = new SplitText("#cover-line", { type: "chars" });
-        gsap.fromTo(
-          split.chars,
-          { opacity: 0, y: 14 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.45,
-            stagger: 0.34,
-            ease: "power2.out",
-            onComplete: function () {
-              gsap.to("#cover-sub", { opacity: 1, duration: 1, delay: 0.4 });
-            }
-          }
-        );
+  function showMusicToggle() {
+    $("#music-toggle").classList.add("show");
+  }
+
+  function hideMusicToggle() {
+    $("#music-toggle").classList.remove("show");
+  }
+
+  function initProgress() {
+    const dotsWrap = $("#progress-dots");
+    dotsWrap.innerHTML = "";
+    CONFIG.letters.forEach(function (letter, index) {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "progress-dot future";
+      dot.setAttribute("aria-label", "第 " + (index + 1) + " 封信：" + letter.title);
+      dot.addEventListener("click", function () {
+        navigateTo(index);
+      });
+      dotsWrap.appendChild(dot);
+    });
+  }
+
+  function updateProgress() {
+    const idx = app.index;
+    const dots = $$(".progress-dot");
+    dots.forEach(function (dot, i) {
+      dot.classList.toggle("current", i === idx);
+      dot.classList.toggle("done", i < idx);
+      dot.classList.toggle("future", i > idx);
+    });
+  }
+
+  function showProgress() {
+    $("#progress").classList.add("show");
+  }
+
+  function hideProgress() {
+    $("#progress").classList.remove("show");
+  }
+
+  function initEasterEgg() {
+    const cfg = CONFIG.easterEgg;
+    if (!cfg || !cfg.message) return;
+    app.eggClicks = 0;
+    app.eggRevealed = false;
+    $("#scene-cover").addEventListener("click", function (event) {
+      if (app.eggRevealed) return;
+      if (event.target.closest(".envelope-shell")) return;
+      if (!$("#scene-cover").classList.contains("active")) return;
+      app.eggClicks++;
+      if (app.eggClicks >= (cfg.clicks || 5)) {
+        app.eggRevealed = true;
+        showEasterEgg(cfg);
+      }
+    });
+  }
+
+  function showEasterEgg(cfg) {
+    const toast = document.createElement("div");
+    toast.className = "egg-toast";
+    toast.innerHTML =
+      '<span class="egg-icon">✨</span>' +
+      "<p>" + cfg.message + "</p>" +
+      '<span class="egg-hint">点一下收起</span>';
+    document.body.appendChild(toast);
+    burst(window.innerWidth / 2, window.innerHeight / 2, { count: 60, spread: 110 });
+    gsap.fromTo(
+      toast,
+      { opacity: 0, scale: 0.82, y: 18 },
+      { opacity: 1, scale: 1, y: 0, duration: 0.55, ease: "back.out(1.6)" }
+    );
+    const dismiss = function () {
+      toast.removeEventListener("click", dismiss);
+      gsap.to(toast, {
+        autoAlpha: 0,
+        scale: 0.92,
+        duration: 0.35,
+        ease: "power2.in",
+        onComplete: function () {
+          toast.remove();
+        }
+      });
+    };
+    toast.addEventListener("click", dismiss);
+    setTimeout(dismiss, 6000);
+  }
+
+  function parseGiftDate(dateStr) {
+    const parts = String(dateStr).split(".").map(Number);
+    if (parts.length < 3 || parts.some(isNaN)) return null;
+    return new Date(parts[0], parts[1] - 1, parts[2], 0, 0, 0);
+  }
+
+  function bootFlow() {
+    const target = parseGiftDate(CONFIG.date);
+    if (!target) {
+      startCover();
+      return;
+    }
+    const now = Date.now();
+    const start = target.getTime();
+    const dayEnd = start + 86400000;
+    if (now < start) {
+      showCountdown(target);
+      return;
+    }
+    if (now >= dayEnd) {
+      showElapsed(target);
+      return;
+    }
+    startCover();
+  }
+
+  let countdownTimer = null;
+
+  function startClock(els, target, elapsed, onDone) {
+    const pad = function (n) {
+      return n < 10 ? "0" + n : "" + n;
+    };
+    const tick = function () {
+      const diff = elapsed
+        ? Date.now() - target.getTime()
+        : target.getTime() - Date.now();
+      if (diff <= 0) {
+        if (countdownTimer) clearInterval(countdownTimer);
+        countdownTimer = null;
+        if (onDone) onDone();
+        return;
+      }
+      els.d.textContent = pad(Math.floor(diff / 86400000));
+      els.h.textContent = pad(Math.floor((diff % 86400000) / 3600000));
+      els.m.textContent = pad(Math.floor((diff % 3600000) / 60000));
+      els.s.textContent = pad(Math.floor((diff % 60000) / 1000));
+    };
+    tick();
+    countdownTimer = setInterval(tick, 1000);
+  }
+
+  function showCountdown(target) {
+    const scene = $("#scene-countdown");
+    setRainMode(true);
+    $("#countdown-title").textContent =
+      "距离 " + (target.getMonth() + 1) + "." + target.getDate() + " 还有";
+    const note = $("#countdown-note");
+    if (CONFIG.countdown && CONFIG.countdown.note) {
+      note.textContent = CONFIG.countdown.note;
+    }
+    scene.classList.add("active");
+    gsap.fromTo(scene, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.8, ease: "power2.out" });
+
+    const els = {
+      d: $("#cd-days"),
+      h: $("#cd-hours"),
+      m: $("#cd-minutes"),
+      s: $("#cd-seconds")
+    };
+    startClock(els, target, false, function () {
+      finishCountdown(scene);
+    });
+
+    // TODO 调试后删除：双击倒计时页直接跳过等待
+    scene.addEventListener("dblclick", function () {
+      if (countdownTimer) clearInterval(countdownTimer);
+      countdownTimer = null;
+      finishCountdown(scene);
+    });
+  }
+
+  function showElapsed(target) {
+    const scene = $("#scene-countdown");
+    const end = new Date(target.getTime() + 86400000);
+    setRainMode(true);
+    $("#countdown-title").textContent =
+      (target.getMonth() + 1) + "." + target.getDate() + " 已经过去";
+    const note = $("#countdown-note");
+    note.textContent =
+      (CONFIG.countdown && CONFIG.countdown.afterNote) || "点一下屏幕，继续看信";
+    scene.classList.add("active");
+    gsap.fromTo(scene, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.8, ease: "power2.out" });
+
+    const els = {
+      d: $("#cd-days"),
+      h: $("#cd-hours"),
+      m: $("#cd-minutes"),
+      s: $("#cd-seconds")
+    };
+    startClock(els, end, true);
+
+    const continueOn = function () {
+      scene.removeEventListener("click", continueOn);
+      if (countdownTimer) clearInterval(countdownTimer);
+      countdownTimer = null;
+      finishCountdown(scene);
+    };
+    scene.addEventListener("click", continueOn);
+  }
+
+  function finishCountdown(scene) {
+    if (scene._countdownDone) return;
+    scene._countdownDone = true;
+    setRainMode(false);
+    burst(window.innerWidth / 2, window.innerHeight / 2, { count: 80, spread: 100 });
+    gsap.to(scene, {
+      autoAlpha: 0,
+      duration: 0.5,
+      ease: "power2.in",
+      onComplete: function () {
+        scene.classList.remove("active");
+        setTimeout(function () {
+          startCover();
+        }, 700);
+      }
+    });
+  }
+
+  let introFontGate = false;
+  let rainStart = null;
+  let rainStop = null;
+
+  function initRain() {
+    const layer = $("#rain-layer");
+    if (!layer) return;
+    const ctxs = [];
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const preloader = document.getElementById("preloader");
+    const targets = preloader ? [layer, preloader] : [layer];
+    for (let i = 0; i < targets.length; i++) {
+      const c = document.createElement("canvas");
+      c.className = i > 0 ? "rain-canvas rain-canvas-front" : "rain-canvas";
+      targets[i].appendChild(c);
+      ctxs.push(c.getContext("2d"));
+    }
+    let drops = [];
+    let running = false;
+    let raf = 0;
+    let last = 0;
+    let clearTimer = 0;
+
+    function makeDrop(anywhere) {
+      return {
+        x: Math.random() * window.innerWidth,
+        y: anywhere ? Math.random() * window.innerHeight : -Math.random() * 40,
+        len: 12 + Math.random() * 18,
+        speed: 260 + Math.random() * 240,
+        slant: 0.14 + Math.random() * 0.08,
+        alpha: 0.16 + Math.random() * 0.28,
+        thick: Math.random() > 0.93
+      };
+    }
+
+    function spawn() {
+      const count = Math.max(60, Math.round((window.innerWidth * window.innerHeight) / 3600));
+      drops = [];
+      for (let i = 0; i < count; i++) drops.push(makeDrop(true));
+    }
+
+    function resize() {
+      ctxs.forEach(function (ctx) {
+        const c = ctx.canvas;
+        c.width = Math.floor(window.innerWidth * dpr);
+        c.height = Math.floor(window.innerHeight * dpr);
+        c.style.width = window.innerWidth + "px";
+        c.style.height = window.innerHeight + "px";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      });
+      spawn();
+    }
+
+    function frame(now) {
+      if (!running) return;
+      const dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
+      for (let i = 0; i < ctxs.length; i++) {
+        ctxs[i].clearRect(0, 0, window.innerWidth, window.innerHeight);
+      }
+      ctxs[0].lineCap = "round";
+      for (let i = 0; i < drops.length; i++) {
+        const d = drops[i];
+        d.y += d.speed * dt;
+        d.x += d.speed * d.slant * dt;
+        if (d.y > window.innerHeight + 24) {
+          drops[i] = makeDrop(false);
+          continue;
+        }
+        for (let j = 0; j < ctxs.length; j++) {
+          const ctx = ctxs[j];
+          if (!ctx.canvas.isConnected) continue;
+          ctx.strokeStyle = "rgba(148,163,184," + d.alpha.toFixed(3) + ")";
+          ctx.lineWidth = d.thick ? 1.6 : 1;
+          ctx.beginPath();
+          ctx.moveTo(d.x, d.y);
+          ctx.lineTo(d.x - d.slant * d.len, d.y - d.len);
+          ctx.stroke();
+        }
+      }
+      raf = requestAnimationFrame(frame);
+    }
+
+    function clearAll() {
+      ctxs.forEach(function (ctx) {
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      });
+    }
+
+    rainStart = function () {
+      if (running) return;
+      if (clearTimer) {
+        clearTimeout(clearTimer);
+        clearTimer = 0;
+      }
+      running = true;
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
+    };
+
+    rainStop = function (immediate) {
+      running = false;
+      if (raf) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      }
+      if (clearTimer) clearTimeout(clearTimer);
+      if (immediate) {
+        clearAll();
       } else {
-        gsap.fromTo(
-          "#cover-line",
-          { opacity: 0 },
-          {
-            opacity: 1,
-            duration: 3,
-            onComplete: function () {
-              gsap.to("#cover-sub", { opacity: 1, duration: 1, delay: 0.4 });
-            }
-          }
-        );
+        clearTimer = setTimeout(clearAll, 1100);
       }
     };
 
-    if (document.fonts && document.fonts.ready) {
-      let fontSettled = false;
-      const runWhenReady = function () {
-        if (fontSettled) return;
-        fontSettled = true;
-        startCover();
-      };
-      document.fonts.ready.then(runWhenReady).catch(runWhenReady);
-      setTimeout(runWhenReady, 3000);
-    } else {
-      startCover();
-    }
+    window.addEventListener("resize", resize);
+    resize();
+  }
 
-    gsap.to(".envelope-shell", { y: -10, duration: 1.7, yoyo: true, repeat: -1, ease: "sine.inOut" });
+  function setRainMode(on) {
+    document.body.classList.toggle("rain-mode", on);
+    if (on) {
+      if (rainStart) rainStart();
+    } else {
+      if (rainStop) rainStop(false);
+    }
+  }
+
+  function coverLineText() {
+    const target = parseGiftDate(CONFIG.date);
+    if (target && Date.now() >= target.getTime() + 86400000) {
+      return String(CONFIG.coverLine).replace("今天好像", "那天好像");
+    }
+    return CONFIG.coverLine;
+  }
+
+  function initCover() {
+    $("#cover-line").textContent = coverLineText();
+    $("#cover-sub").textContent = CONFIG.coverSub;
     $("#cover-envelope").addEventListener("click", startExperience);
+    initEasterEgg();
+  }
+
+  function startCover() {
+    const cover = $("#scene-cover");
+    cover.classList.add("active");
+    gsap.fromTo(cover, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.7, ease: "power2.out" });
+    playCoverIntro();
+    gsap.killTweensOf(".envelope-shell");
+    gsap.to(".envelope-shell", { y: -10, duration: 1.7, yoyo: true, repeat: -1, ease: "sine.inOut" });
+  }
+
+  function playCoverIntro() {
+    if (!introFontGate) {
+      introFontGate = true;
+      if (document.fonts && document.fonts.status !== "loaded") {
+        const run = function () {
+          playCoverIntro();
+        };
+        document.fonts.ready.then(run).catch(run);
+        setTimeout(run, 3000);
+        return;
+      }
+    }
+    const line = $("#cover-line");
+    line.textContent = coverLineText();
+    gsap.set("#cover-sub", { opacity: 0 });
+    if (window.SplitText) {
+      const split = new SplitText("#cover-line", { type: "chars" });
+      gsap.fromTo(
+        split.chars,
+        { opacity: 0, y: 14 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.35,
+          stagger: 0.18,
+          ease: "power2.out",
+          onComplete: function () {
+            gsap.to("#cover-sub", { opacity: 1, duration: 1, delay: 0.4 });
+          }
+        }
+      );
+    } else {
+      gsap.fromTo(
+        "#cover-line",
+        { opacity: 0 },
+        {
+          opacity: 1,
+          duration: 3,
+          onComplete: function () {
+            gsap.to("#cover-sub", { opacity: 1, duration: 1, delay: 0.4 });
+          }
+        }
+      );
+    }
   }
 
   function initBackground() {
@@ -278,6 +629,8 @@
     if (app.busy) return;
     app.busy = true;
     startMusic();
+    showMusicToggle();
+    app.eggClicks = 0;
     burst(window.innerWidth / 2, window.innerHeight / 2, { count: 90, spread: 100 });
     gsap.to("#scene-cover", {
       autoAlpha: 0,
@@ -313,6 +666,8 @@
       '<article class="letter-paper"><div class="paper-inner"></div></article>';
     stage.appendChild(scene);
     $("#scene-letter").classList.add("active");
+    showProgress();
+    updateProgress();
 
     const env = $(".envelope", scene);
     const openHandler = function (event) {
@@ -464,7 +819,7 @@
     reserveNextBtn(box);
 
     gsap.delayedCall(1.5, function () {
-      showNext(box, "收好这封信");
+      showNext(box, "收好");
     });
   }
 
@@ -656,7 +1011,7 @@
     if (box._memoriesShown) return;
     box._memoriesShown = true;
     gsap.delayedCall(0.4, function () {
-      showNext(box, "收好这份回忆");
+      showNext(box, "收好");
     });
   }
 
@@ -705,7 +1060,7 @@
         gsap.fromTo(card, { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6 });
         burst(window.innerWidth / 2, window.innerHeight * 0.55, { count: 120, spread: 120, shapes: ["star", "circle"] });
         gsap.delayedCall(1.3, function () {
-          showNext(box, "星星收好");
+          showNext(box, "收好");
         });
       });
     }
@@ -744,13 +1099,9 @@
     });
     const result = $("#flower-result", box);
 
-    if (opt.id === "money") {
-      result.innerHTML = '<div class="money-flower">' + MONEY_SVG + "</div><p class=\"flower-message\">" + opt.message + "</p>";
-    } else {
-      result.innerHTML =
-        '<img class="flower-img" src="' + opt.image + '" alt="' + opt.name + '" loading="lazy">' +
-        '<p class="flower-message">' + opt.message + "</p>";
-    }
+    result.innerHTML =
+      '<img class="flower-img" src="' + opt.image + '" alt="' + opt.name + '" loading="lazy">' +
+      '<p class="flower-message">' + opt.message + "</p>";
     result.classList.add("show");
     gsap.fromTo(result, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.6 });
     confetti({
@@ -761,7 +1112,7 @@
       scalar: 0.8
     });
     gsap.delayedCall(1.7, function () {
-      showNext(box, "收好这朵花");
+      showNext(box, "收好");
     });
   }
 
@@ -777,11 +1128,21 @@
 
     startFlameFlicker();
 
-    gsap.delayedCall(2.8, blowOutCandles);
-    gsap.delayedCall(4.8, function () {
+    const PROMPT_DELAY = 2.5;
+    const BLOW_DELAY = 2.5;
+
+    gsap.delayedCall(PROMPT_DELAY, function () {
+      gsap.fromTo(
+        ".wish-prompt",
+        { opacity: 0, scale: 0.9 },
+        { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" }
+      );
+    });
+    gsap.delayedCall(PROMPT_DELAY + BLOW_DELAY, blowOutCandles);
+    gsap.delayedCall(PROMPT_DELAY + BLOW_DELAY + 1.5, function () {
       gsap.to(".wish-after", { opacity: 1, y: 0, duration: 0.6 });
       gsap.delayedCall(1.2, function () {
-        showNext(box, "愿望收好");
+        showNext(box, "收好");
       });
     });
   }
@@ -866,7 +1227,7 @@
 
     fireworks(4);
     gsap.delayedCall(5.2, function () {
-      showNext(box, "收好这封信");
+      showNext(box, "收好");
     });
   }
 
@@ -907,16 +1268,17 @@
     }
   }
 
-  function closeLetter(index) {
-    if (app.busy) return;
-    app.busy = true;
+  function teardownScene() {
     const scene = $("#letter-stage .letter-scene");
+    if (!scene) return null;
     const paper = $(".letter-paper", scene);
     const box = $(".paper-inner", scene) || paper;
-    paper.classList.remove("open");
     const env = $(".envelope", scene);
-    env.classList.remove("opened");
-    env.style.display = "";
+    paper.classList.remove("open");
+    if (env) {
+      env.classList.remove("opened");
+      env.style.display = "";
+    }
     if (app.flameTweens) {
       app.flameTweens.forEach(function (tl) { tl.kill(); });
       app.flameTweens = [];
@@ -929,6 +1291,20 @@
       app._closeEnlarged();
       app._closeEnlarged = null;
     }
+    return { scene: scene, paper: paper, env: env };
+  }
+
+  function closeLetter(index) {
+    if (app.busy) return;
+    app.busy = true;
+    const parts = teardownScene();
+    if (!parts) {
+      app.busy = false;
+      return;
+    }
+    const scene = parts.scene;
+    const paper = parts.paper;
+    const env = parts.env;
 
     const tl = gsap.timeline({
       onComplete: function () {
@@ -959,8 +1335,50 @@
       }, [], 0.85);
   }
 
+  function navigateTo(index) {
+    if (app.busy) return;
+    if (index < 0 || index >= CONFIG.letters.length || index === app.index) return;
+    app.busy = true;
+    const parts = teardownScene();
+    const done = function () {
+      showLetter(index);
+      app.busy = false;
+    };
+    if (!parts) {
+      done();
+      return;
+    }
+    const scene = parts.scene;
+    const paper = parts.paper;
+    const env = parts.env;
+    const tl = gsap.timeline({
+      onComplete: function () {
+        gsap.to(scene, {
+          autoAlpha: 0,
+          y: -24,
+          duration: 0.5,
+          ease: "power2.in",
+          onComplete: function () {
+            scene.remove();
+            done();
+          }
+        });
+      }
+    });
+    tl.to(paper, { autoAlpha: 0, y: 20, scale: 0.98, duration: 0.45, ease: "power2.in" }, 0)
+      .to(env, { autoAlpha: 1, y: 0, scale: 1, duration: 0.35 }, 0)
+      .to($(".env-letter", env), { yPercent: 0, duration: 0.5, ease: "power2.in" }, 0.2)
+      .to($(".env-flap", env), { rotationX: 0, duration: 0.5, ease: "power3.inOut" }, 0.5)
+      .call(function () {
+        env.classList.remove("opening");
+        env.classList.add("closing");
+      }, [], 0.7);
+  }
+
   function finish() {
     $("#scene-letter").classList.remove("active");
+    hideProgress();
+    hideMusicToggle();
     $("#curtain-sub").textContent = "To " + CONFIG.recipient + " · From " + CONFIG.sender;
     $("#curtain-date").textContent = CONFIG.date;
     gsap.to("#curtain", { autoAlpha: 1, duration: 1.2, ease: "power2.out" });
@@ -1041,6 +1459,16 @@
   window.addEventListener("DOMContentLoaded", function () {
     initCover();
     initBackground();
+    initMusicToggle();
+    initProgress();
+    initRain();
+    const waitTarget = parseGiftDate(CONFIG.date);
+    if (waitTarget) {
+      const _start = waitTarget.getTime();
+      if (Date.now() < _start || Date.now() >= _start + 86400000) {
+        setRainMode(true);
+      }
+    }
     preloadAssets();
   });
 
@@ -1055,6 +1483,7 @@
       "assets/flowers/rose.jpg",
       "assets/flowers/sunflower.jpg",
       "assets/flowers/tulip.jpg",
+      "assets/flowers/money.jpg",
       "handdrawn-bg-preview.png",
     ];
     var audio = [
@@ -1096,5 +1525,6 @@
         if (preloader.parentNode) preloader.parentNode.removeChild(preloader);
       }, 800);
     }
+    bootFlow();
   }
 })();

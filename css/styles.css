@@ -60,6 +60,22 @@ button {
   transition: opacity 0.8s ease, visibility 0.8s ease;
 }
 
+#preloader > * {
+  position: relative;
+  z-index: 1;
+}
+
+#preloader .rain-canvas-front {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 1;
+}
+
+body.rain-mode #preloader {
+  background: linear-gradient(160deg, #334155, #0f172a);
+}
+
 #preloader.hidden {
   opacity: 0;
   visibility: hidden;
@@ -739,15 +755,6 @@ button {
   line-height: 1.7;
 }
 
-.money-flower {
-  width: min(58vw, 280px);
-}
-
-.money-svg {
-  width: 100%;
-  height: auto;
-}
-
 .wish-line1,
 .wish-line2 {
   text-align: center;
@@ -1154,4 +1161,388 @@ button {
 
 .no-offsetpath .orbit-item-inner {
   transform: none;
+}
+
+/* ---- 音乐开关 ---- */
+.icon-btn {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top));
+  right: 12px;
+  z-index: 60;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(180, 130, 90, 0.4);
+  background: rgba(255, 250, 243, 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: var(--rose-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(91, 58, 46, 0.16);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.2s ease, background 1s ease,
+    border-color 1s ease, color 1s ease;
+}
+
+.icon-btn.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.icon-btn:active {
+  transform: scale(0.92);
+}
+
+.icon-btn svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.icon-btn .icon-off {
+  display: none;
+}
+
+.icon-btn.muted .icon-on {
+  display: none;
+}
+
+.icon-btn.muted .icon-off {
+  display: block;
+}
+
+/* ---- 章节进度 ---- */
+.progress {
+  position: fixed;
+  left: 50%;
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 250, 243, 0.85);
+  border: 1.5px solid rgba(180, 130, 90, 0.4);
+  box-shadow: 0 8px 22px rgba(91, 58, 46, 0.14);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.progress.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.progress-dots {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.progress-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(159, 18, 57, 0.45);
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.progress-dot.done {
+  background: #fda4af;
+  border-color: #f43f5e;
+}
+
+.progress-dot.current {
+  width: 13px;
+  height: 13px;
+  background: var(--rose);
+  border-color: var(--rose-deep);
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
+  transform: scale(1.1);
+  cursor: default;
+}
+
+.progress-dot.future {
+  opacity: 0.55;
+  cursor: pointer;
+}
+
+.progress-dot.future:hover {
+  opacity: 0.9;
+}
+
+/* ---- 彩蛋弹卡 ---- */
+.egg-toast {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 80;
+  max-width: min(82vw, 420px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 22px 26px;
+  background: linear-gradient(160deg, #fff7ed, #fffbeb);
+  border: 2px dashed #f59e0b;
+  border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(91, 58, 46, 0.28);
+  text-align: center;
+  cursor: pointer;
+}
+
+.egg-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.egg-toast p {
+  font-size: clamp(1rem, 2.8vw, 1.25rem);
+  color: #7c2d12;
+  line-height: 1.7;
+}
+
+.egg-hint {
+  font-size: 0.85rem;
+  color: #a16207;
+  opacity: 0.75;
+}
+
+@media (hover: none) {
+  .icon-btn:active {
+    transform: scale(0.9);
+  }
+}
+
+/* ---- 雨日模式（倒计时等待期间） ---- */
+#rain-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 50% 18%, rgba(71, 85, 105, 0.5), transparent 55%),
+    radial-gradient(140% 100% at 82% 92%, rgba(30, 41, 59, 0.85), transparent 62%),
+    linear-gradient(160deg, #334155, #0f172a);
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+body.rain-mode #rain-bg {
+  opacity: 1;
+}
+
+#rain-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+
+.rain-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+body.rain-mode #rain-layer {
+  opacity: 1;
+}
+
+#bg-anim {
+  transition: opacity 1s ease;
+}
+
+body.rain-mode #bg-anim {
+  opacity: 0;
+}
+
+body.rain-mode #app::after {
+  background: radial-gradient(120% 90% at 50% 42%, transparent 55%, rgba(15, 23, 42, 0.3) 100%);
+}
+
+body.rain-mode #cover-line {
+  color: #e2e8f0;
+  text-shadow: 0 2px 0 rgba(15, 23, 42, 0.35), 0 8px 24px rgba(15, 23, 42, 0.4);
+}
+
+body.rain-mode .cover-sub,
+body.rain-mode .cover-hint,
+body.rain-mode .open-hint {
+  color: #94a3b8;
+}
+
+body.rain-mode .countdown-title {
+  color: #e2e8f0;
+}
+
+body.rain-mode .countdown-note {
+  color: #94a3b8;
+}
+
+body.rain-mode .countdown-cell {
+  background: rgba(51, 65, 85, 0.55);
+  border-color: rgba(148, 163, 184, 0.45);
+}
+
+body.rain-mode .countdown-cell span {
+  color: #f8fafc;
+}
+
+body.rain-mode .countdown-cell em {
+  color: #94a3b8;
+}
+
+body.rain-mode .countdown-sep {
+  color: #64748b;
+}
+
+body.rain-mode .progress {
+  background: rgba(30, 41, 59, 0.75);
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+body.rain-mode .progress-dot {
+  border-color: rgba(226, 232, 240, 0.5);
+}
+
+body.rain-mode .progress-dot.done {
+  background: #818cf8;
+  border-color: #a5b4fc;
+}
+
+body.rain-mode .progress-dot.current {
+  background: #60a5fa;
+  border-color: #93c5fd;
+  box-shadow: 0 0 10px rgba(96, 165, 250, 0.6);
+}
+
+body.rain-mode .icon-btn {
+  background: rgba(30, 41, 59, 0.75);
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #e2e8f0;
+}
+
+/* 雨日 <-> 晴日切换时颜色平滑过渡 */
+.countdown-title,
+.countdown-note,
+.countdown-cell span,
+.countdown-cell em,
+.countdown-sep {
+  transition: color 1s ease;
+}
+
+.countdown-cell,
+.progress {
+  transition: background 1s ease, border-color 1s ease, box-shadow 1s ease;
+}
+
+/* ---- 日期倒计时 ---- */
+.scene-countdown {
+  flex-direction: column;
+  text-align: center;
+  padding: calc(24px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom));
+}
+
+.countdown-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.countdown-gift {
+  font-size: clamp(2.2rem, 7vw, 3rem);
+  line-height: 1;
+  animation: giftBob 2.2s ease-in-out infinite;
+  filter: drop-shadow(0 8px 18px rgba(91, 58, 46, 0.18));
+}
+
+@keyframes giftBob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(3deg);
+  }
+}
+
+.countdown-title {
+  font-size: clamp(1.3rem, 4.4vw, 2rem);
+  font-weight: 400;
+  color: #7c2d12;
+}
+
+.countdown-clock {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.countdown-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 74px;
+  padding: 14px 10px 12px;
+  border: 2px dashed #d9b99b;
+  border-radius: 12px;
+  background: rgba(255, 250, 243, 0.8);
+  box-shadow: 0 8px 22px rgba(91, 58, 46, 0.12);
+}
+
+.countdown-cell span {
+  font-size: clamp(1.7rem, 6vw, 2.5rem);
+  color: #be123c;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.countdown-cell em {
+  font-style: normal;
+  font-size: 0.9rem;
+  color: #a16207;
+  letter-spacing: 0.1em;
+}
+
+.countdown-sep {
+  font-size: 1.5rem;
+  color: #d9b99b;
+  padding-bottom: 30px;
+  line-height: 1;
+}
+
+.countdown-note {
+  font-size: clamp(1rem, 2.6vw, 1.2rem);
+  color: #a16207;
+  line-height: 1.8;
+  max-width: 20em;
+}
+
+@media (max-width: 420px) {
+  .countdown-cell {
+    min-width: 60px;
+    padding: 10px 6px 9px;
+  }
+
+  .countdown-clock {
+    gap: 5px;
+  }
 }
