@@ -391,14 +391,10 @@
     if (!layer) return;
     const ctxs = [];
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const preloader = document.getElementById("preloader");
-    const targets = preloader ? [layer, preloader] : [layer];
-    for (let i = 0; i < targets.length; i++) {
-      const c = document.createElement("canvas");
-      c.className = i > 0 ? "rain-canvas rain-canvas-front" : "rain-canvas";
-      targets[i].appendChild(c);
-      ctxs.push(c.getContext("2d"));
-    }
+    const c = document.createElement("canvas");
+    c.className = "rain-canvas";
+    layer.appendChild(c);
+    ctxs.push(c.getContext("2d"));
     let drops = [];
     let running = false;
     let raf = 0;
@@ -498,7 +494,6 @@
 
     window.addEventListener("resize", resize);
     resize();
-    rainStart();
   }
 
   function setRainMode(on) {
