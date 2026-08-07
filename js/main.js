@@ -498,6 +498,7 @@
 
     window.addEventListener("resize", resize);
     resize();
+    rainStart();
   }
 
   function setRainMode(on) {
