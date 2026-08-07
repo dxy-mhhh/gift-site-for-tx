@@ -159,7 +159,7 @@
     const bgm = $("#bgm");
     bgm.volume = 0;
     bgm.play().catch(function () {});
-    fadeMusic(MUSIC_VOLUME, 2);
+    fadeMusic(MUSIC_VOLUME, 3);
   }
 
   function initMusicToggle() {
