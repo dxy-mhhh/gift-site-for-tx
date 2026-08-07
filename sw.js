@@ -13,8 +13,6 @@ const CORE_ASSETS = [
   "./libs/SplitText.min.js",
   "./libs/hanzi-writer.min.js",
   "./libs/canvas-confetti.min.js",
-  "./assets/music/birthday-gentle-loop.mp3",
-  "./assets/music/birthday-gentle-loop.ogg",
   "./assets/flowers/rose.jpg",
   "./assets/flowers/sunflower.jpg",
   "./assets/flowers/tulip.jpg",
