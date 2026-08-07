@@ -159,19 +159,7 @@
     const bgm = $("#bgm");
     bgm.volume = 0;
     bgm.play().catch(function () {});
-    fadeMusic(MUSIC_VOLUME, 3);
-  }
-
-  function initMusicToggle() {
-    // toggle button removed — no-op now
-  }
-
-  function showMusicToggle() {
-    // toggle button removed — keep for safety
-  }
-
-  function hideMusicToggle() {
-    // toggle button removed — keep for safety
+    fadeMusic(MUSIC_VOLUME, 2);
   }
 
   function initProgress() {
@@ -327,11 +315,25 @@
       finishCountdown(scene);
     });
 
-    // TODO 调试后删除：双击倒计时页直接跳过等待
-    scene.addEventListener("dblclick", function () {
-      if (countdownTimer) clearInterval(countdownTimer);
-      countdownTimer = null;
-      finishCountdown(scene);
+    // 连续点 10 下跳过等待
+    let skipClicks = 0;
+    let skipTimer = null;
+    scene.addEventListener("click", function () {
+      skipClicks++;
+      clearTimeout(skipTimer);
+      skipTimer = setTimeout(function () {
+        skipClicks = 0;
+      }, 1200);
+      if (skipClicks >= 10) {
+        skipClicks = 0;
+        clearTimeout(skipTimer);
+        showEasterEgg({ message: "这么迫不及待？我调试方法都被你找到了" });
+        if (countdownTimer) clearInterval(countdownTimer);
+        countdownTimer = null;
+        setTimeout(function () {
+          finishCountdown(scene);
+        }, 800);
+      }
     });
   }
 
@@ -391,10 +393,14 @@
     if (!layer) return;
     const ctxs = [];
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const c = document.createElement("canvas");
-    c.className = "rain-canvas";
-    layer.appendChild(c);
-    ctxs.push(c.getContext("2d"));
+    const preloader = document.getElementById("preloader");
+    const targets = preloader ? [layer, preloader] : [layer];
+    for (let i = 0; i < targets.length; i++) {
+      const c = document.createElement("canvas");
+      c.className = i > 0 ? "rain-canvas rain-canvas-front" : "rain-canvas";
+      targets[i].appendChild(c);
+      ctxs.push(c.getContext("2d"));
+    }
     let drops = [];
     let running = false;
     let raf = 0;
@@ -1448,7 +1454,6 @@
   window.addEventListener("DOMContentLoaded", function () {
     initCover();
     initBackground();
-    initMusicToggle();
     initProgress();
     initRain();
     const waitTarget = parseGiftDate(CONFIG.date);

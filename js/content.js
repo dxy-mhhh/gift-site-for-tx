@@ -1,7 +1,7 @@
 window.GIFT_CONFIG = {
   sender: "dxy",
   recipient: "tx",
-  coverLine: "今天好像是你的生日，有个小礼物给你",
+  coverLine: "今天好像是你的生日，有个礼物给你",
   coverSub: "dxy 准备的一点小心思",
   date: "2026.08.08", // TODO 测试后恢复 2026.08.08
   countdown: {
@@ -125,15 +125,15 @@ window.GIFT_CONFIG = {
       line1: "流程还是有的",
       line2: "噔噔！",
       prompt: "许愿吧！",
-      after: "哈哈，我帮你吹了，愿望我实现不了，但可以满足你一些小要求，同dxy讲吧"
+      after: "哈哈，不知道你吹了没，我帮你吹了，愿望我实现不了，但能做些力所能及的事，同dxy讲吧"
     },
     {
       id: "ending",
       skin: "gold",
       title: "一切安好",
       kind: "ending",
-      greeting: "给 tx：",
-      body: "愿你的 21 岁，温柔又闪亮。所有小小的愿望，都会慢慢实现；大大的愿望，马上实现哈哈哈；所有想去的地方，都会有风陪你。",
+      greeting: "给 TX：",
+      body: "要落幕了，一些关心的、祝福的、在意的话，本想一顿输出而来，但会不会有些多愁善感了，还是算了吧，千言万语汇成一句，生日快乐，TX...",
       signature: "—— dxy",
       date: "2026.08.08"
     }
