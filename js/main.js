@@ -5,6 +5,7 @@
   const app = {
     index: -1,
     busy: false,
+    musicStarted: false,
     starsLit: 0,
     flowerChosen: false
   };
@@ -136,6 +137,56 @@
         }
       });
     }
+  }
+
+  const MUSIC_VOLUME = 0.28;
+
+  function fadeMusic(to, duration, onDone) {
+    const bgm = $("#bgm");
+    gsap.killTweensOf(bgm, "volume");
+    if (to > 0 && bgm.volume < 0.0005) bgm.volume = 0.0001;
+    gsap.to(bgm, {
+      volume: to,
+      duration: duration,
+      ease: "power2.out",
+      onComplete: onDone
+    });
+  }
+
+  function startMusic() {
+    if (app.musicStarted) return;
+    app.musicStarted = true;
+    const bgm = $("#bgm");
+    bgm.volume = 0;
+    bgm.play().catch(function () {});
+    fadeMusic(MUSIC_VOLUME, 2);
+  }
+
+  function initMusicToggle() {
+    const btn = $("#music-toggle");
+    const setState = function (playing) {
+      btn.classList.toggle("muted", !playing);
+      btn.setAttribute("aria-label", playing ? "关闭音乐" : "打开音乐");
+    };
+    setState(true);
+    btn.addEventListener("click", function () {
+      if (!app.musicStarted) {
+        startMusic();
+        setState(true);
+        return;
+      }
+      app.musicMuted = !app.musicMuted;
+      fadeMusic(app.musicMuted ? 0 : MUSIC_VOLUME, 0.8);
+      setState(!app.musicMuted);
+    });
+  }
+
+  function showMusicToggle() {
+    $("#music-toggle").classList.add("show");
+  }
+
+  function hideMusicToggle() {
+    $("#music-toggle").classList.remove("show");
   }
 
   function initProgress() {
@@ -591,6 +642,8 @@
   function startExperience() {
     if (app.busy) return;
     app.busy = true;
+    startMusic();
+    showMusicToggle();
     app.eggClicks = 0;
     burst(window.innerWidth / 2, window.innerHeight / 2, { count: 90, spread: 100 });
     gsap.to("#scene-cover", {
@@ -1339,6 +1392,7 @@
   function finish() {
     $("#scene-letter").classList.remove("active");
     hideProgress();
+    hideMusicToggle();
     $("#curtain-sub").textContent = "To " + CONFIG.recipient + " · From " + CONFIG.sender;
     $("#curtain-date").textContent = CONFIG.date;
     gsap.to("#curtain", { autoAlpha: 1, duration: 1.2, ease: "power2.out" });
@@ -1392,6 +1446,9 @@
     }
 
     fireworks(5);
+    fadeMusic(0, 2.5, function () {
+      $("#bgm").pause();
+    });
   }
 
   document.addEventListener("click", function (event) {
@@ -1412,6 +1469,7 @@
   window.addEventListener("DOMContentLoaded", function () {
     initCover();
     initBackground();
+    initMusicToggle();
     initProgress();
     initRain();
     const waitTarget = parseGiftDate(CONFIG.date);
@@ -1438,8 +1496,11 @@
       "assets/flowers/money.jpg",
       "handdrawn-bg-preview.png",
     ];
+    var audio = [
+      "assets/music/birthday-gentle-loop.mp3",
+    ];
 
-    var total = images.length;
+    var total = images.length + audio.length;
     var loaded = 0;
     var text = document.getElementById("preloader-text");
 
